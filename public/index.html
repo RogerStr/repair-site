@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Reparatur-System</title>
+<style>
+body { font-family: Arial; margin:20px; background:#f4f4f4; }
+section { background:white; padding:15px; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,.1); margin-bottom:20px; }
+input, textarea { width:100%; padding:6px; margin-top:4px; }
+button { padding:6px 10px; margin-top:6px; }
+table { width:100%; border-collapse:collapse; }
+th, td { border:1px solid #ccc; padding:6px; }
+th { background:#007bff; color:white; }
+</style>
+</head>
+<body>
+<h1>🔧 Reparatur-System mit Dashboard</h1>
+
+<section>
+<h2>➕ Neuer / Bearbeiten Eintrag</h2>
+<form id="form">
+<input type="hidden" id="editId">
+<input type="date" id="createdDate" required>
+<input type="text" id="creatorName" placeholder="Ersteller" required>
+<input list="deviceList" id="deviceName" placeholder="Gerät" required>
+<datalist id="deviceList"></datalist>
+<textarea id="problem" placeholder="Problem" required></textarea>
+<input type="date" id="solvedDate">
+<input type="text" id="solverName" placeholder="Problemlöser">
+<textarea id="solution" placeholder="Lösung"></textarea>
+<button>Speichern</button>
+</form>
+</section>
+
+<section>
+<h2>📋 Reparaturen</h2>
+<table>
+<thead>
+<tr><th>ID</th><th>Erstellt</th><th>Ersteller</th><th>Gerät</th><th>Problem</th><th>Gelöst</th><th>Löser</th><th>Lösung</th><th>Aktion</th></tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+</section>
+
+<section>
+<h2>📊 Statistik Dashboard</h2>
+<div id="stats"></div>
+</section>
+
+<script>
+const form = document.getElementById('form');
+const tbody = document.getElementById('tbody');
+const deviceList = document.getElementById('deviceList');
+const statsDiv = document.getElementById('stats');
+
+async function loadData() {
+  const res = await fetch('/api/repairs');
+  const data = await res.json();
+  tbody.innerHTML = '';
+  const devices = new Set();
+
+  data.forEach(r => {
+    devices.add(r.deviceName);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.id}</td>
+      <td>${r.createdDate}</td>
+      <td>${r.creatorName}</td>
+      <td>${r.deviceName}</td>
+      <td>${r.problem}</td>
+      <td>${r.solvedDate || ''}</td>
+      <td>${r.solverName || ''}</td>
+      <td>${r.solution || ''}</td>
+      <td>
+        <button onclick='edit(${JSON.stringify(r)})'>✏️</button>
+        <button onclick='del(${r.id})'>❌</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  deviceList.innerHTML = '';
+  devices.forEach(d => {
+    const o = document.createElement('option');
+    o.value = d;
+    deviceList.appendChild(o);
+  });
+}
+
+form.onsubmit = async e => {
+  e.preventDefault();
+  const entry = {
+    createdDate: createdDate.value,
+    creatorName: creatorName.value,
+    deviceName: deviceName.value,
+    problem: problem.value,
+    solvedDate: solvedDate.value,
+    solverName: solverName.value,
+    solution: solution.value
+  };
+
+  if (editId.value) {
+    await fetch('/api/repairs/' + editId.value, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(entry)
+    });
+  } else {
+    await fetch('/api/repairs', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(entry)
+    });
+  }
+
+  form.reset();
+  editId.value = '';
+  loadData();
+  loadStats();
+};
+
+function edit(r) {
+  editId.value = r.id;
+  createdDate.value = r.createdDate;
+  creatorName.value = r.creatorName;
+  deviceName.value = r.deviceName;
+  problem.value = r.problem;
+  solvedDate.value = r.solvedDate;
+  solverName.value = r.solverName;
+  solution.value = r.solution;
+}
+
+async function del(id){
+  await fetch('/api/repairs/' + id, {method:'DELETE'});
+  loadData();
+  loadStats();
+}
+
+async function loadStats() {
+  const res = await fetch('/api/stats');
+  const s = await res.json();
+
+  let html = `<b>Gesamt Reparaturen:</b> ${s.total}<br>`;
+  html += `<b>Gelöste Reparaturen:</b> ${s.solved}<br><br>`;
+  html += '<b>Geräte Statistik:</b><ul>';
+
+  s.devices.forEach(d => {
+    html += `<li>${d.deviceName}: ${d.count}</li>`;
+  });
+
+  html += '</ul>';
+  statsDiv.innerHTML = html;
+}
+
+loadData();
+loadStats();
+</script>
+</body>
+</html>
