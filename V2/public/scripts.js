@@ -1,8 +1,7 @@
-// Datum in Format TT.MM.JJJJ umwandeln
+// Hilfsfunktion: Datum in Format TT.MM.JJJJ
 function formatDateToDDMMYYYY(date) {
     if (!date) return "";
-    const parts = typeof date === "string" ? date.split(/[.\-\/]/) : [];
-    if (parts.length === 3 && parts[2].length === 4) return date; // schon dd.mm.yyyy
+    if (typeof date === "string" && date.match(/^\d{2}\.\d{2}\.\d{4}$/)) return date;
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, "0");
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -12,13 +11,15 @@ function formatDateToDDMMYYYY(date) {
 
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("repairForm");
+    const createdDateInput = document.getElementById("createdDate");
     const openTableBody = document.querySelector("#openRepairsTable tbody");
     const doneTableBody = document.querySelector("#doneRepairsTable tbody");
 
+    // 🚀 Beim Laden der Seite: aktuelles Datum ins Formular setzen
     const todayFormatted = formatDateToDDMMYYYY(new Date());
-    document.getElementById("createdDate").value = todayFormatted;
+    createdDateInput.value = todayFormatted;
 
-    // Reparaturen laden und in offene / erledigte trennen
+    // --- Reparaturen laden ---
     async function loadRepairs() {
         const res = await fetch("/api/repairs");
         const data = await res.json();
@@ -28,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         data.forEach((r) => {
             if (r.completed) {
-                // erledigte Reparaturen
+                // erledigte Reparaturen (nicht editierbar)
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
           <td>${r.id}</td>
@@ -44,20 +45,23 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 // offene Reparaturen (editierbar)
                 const tr = document.createElement("tr");
-                const repairDateFormatted = formatDateToDDMMYYYY(r.repairDate || new Date());
+                const repairDateValue = r.repairDate
+                    ? formatDateToDDMMYYYY(r.repairDate)
+                    : todayFormatted;
+
                 tr.innerHTML = `
           <td>${r.id}</td>
           <td>${formatDateToDDMMYYYY(r.createdDate)}</td>
           <td>${r.creatorName}</td>
           <td>${r.deviceName}</td>
           <td>${r.description}</td>
-          <td><input type="text" value="${repairDateFormatted}" data-field="repairDate" placeholder="TT.MM.JJJJ"></td>
+          <td><input type="text" value="${repairDateValue}" data-field="repairDate" placeholder="TT.MM.JJJJ"></td>
           <td><input type="text" value="${r.repairedBy || ""}" data-field="repairedBy"></td>
           <td><input type="text" value="${r.repairDetails || ""}" data-field="repairDetails"></td>
           <td><input type="checkbox" ${r.completed ? "checked" : ""} data-field="completed"></td>
         `;
 
-                // Änderungen speichern
+                // Änderung speichern
                 tr.querySelectorAll("input").forEach((input) => {
                     input.addEventListener("change", async () => {
                         const updated = {
@@ -72,7 +76,7 @@ document.addEventListener("DOMContentLoaded", () => {
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify(updated),
                         });
-                        loadRepairs(); // Liste neu laden, damit Eintrag ggf. verschoben wird
+                        loadRepairs(); // bei Änderung neu laden
                     });
                 });
 
@@ -81,12 +85,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Formular absenden
+    // --- Formular absenden ---
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         const payload = {
-            createdDate: document.getElementById("createdDate").value,
+            createdDate: createdDateInput.value,
             creatorName: document.getElementById("creatorName").value,
             deviceName: document.getElementById("deviceName").value,
             description: document.getElementById("description").value,
@@ -99,10 +103,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         form.reset();
-        document.getElementById("createdDate").value = todayFormatted;
+        createdDateInput.value = todayFormatted; // 🚀 nach Reset wieder aktuelles Datum setzen
         loadRepairs();
     });
 
     loadRepairs();
 });
-
