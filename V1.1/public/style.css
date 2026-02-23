@@ -18,27 +18,17 @@ label {
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
 }
 
 th, td {
     border: 1px solid #ddd;
-    padding: 6px 8px;
+    padding: 8px;
 }
 
 tr:nth-child(even) {
     background-color: #f2f2f2;
 }
 
-input[type="text"], textarea {
+input, textarea {
     width: 50%;
-}
-
-h2 {
-    margin-top: 40px;
-}
-
-#doneRepairsTable {
-    opacity: 0.85;
-    background: #f0f0f0;
 }
