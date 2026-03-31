@@ -42,3 +42,39 @@ h2 {
     opacity: 0.85;
     background: #f0f0f0;
 }
+
+.photo-thumb {
+    position: relative;
+    display: inline-block;
+    margin: 2px;
+}
+
+.photo-thumb img {
+    max-width: 60px;
+    max-height: 60px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.photo-thumb:hover img {
+    opacity: 0.7;
+}
+
+.photo-thumb:hover .photo-zoom {
+    display: block;
+}
+
+.photo-zoom {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    max-width: 80vw;
+    max-height: 80vh;
+    border-radius: 8px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    pointer-events: none;
+}
