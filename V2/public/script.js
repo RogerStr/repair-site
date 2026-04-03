@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <td>${renderPhotosReadonly(r.photos)}</td>
             <td>${formatDateToDDMMYYYY(r.repairDate)}</td>
             <td>${r.repairedBy || ""}</td>
-            <td>${r.repairDetails || ""}</td>
+            <td style="white-space: pre-wrap">${r.repairDetails || ""}</td>
           `;
                     doneTableBody.appendChild(tr);
                 } else {
@@ -153,9 +153,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <td><input type="text" value="${r.deviceName || ""}" data-field="deviceName"></td>
             <td><textarea data-field="description">${r.description || ""}</textarea></td>
             <td class="photos-cell"></td>
-            <td><input type="text" value="${repairDateValue}" data-field="repairDate" placeholder="TT.MM.JJJJ"></td>
+            <td><input type="text" value="${repairDateValue}" data-field="repairDate" placeholder="TT.MM.JJJJ" ></td>
             <td><input type="text" value="${r.repairedBy || ""}" data-field="repairedBy"></td>
-            <td><input type="text" value="${r.repairDetails || ""}" data-field="repairDetails"></td>
+            <td><textarea data-field="repairDetails">${r.repairDetails || ""}</textarea></td>
             <td><input type="checkbox" ${r.completed ? "checked" : ""} data-field="completed"></td>
           `;
 

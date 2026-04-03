@@ -34,6 +34,17 @@ input[type="text"], textarea {
     width: 50%;
 }
 
+table textarea {
+    width: 100%;
+    min-width: 200px;
+    box-sizing: border-box;
+}
+
+table input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+}
+
 h2 {
     margin-top: 40px;
 }
