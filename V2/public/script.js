@@ -125,6 +125,9 @@ document.addEventListener("DOMContentLoaded", () => {
             openTableBody.innerHTML = "";
             doneTableBody.innerHTML = "";
 
+            const openCount = repairs.filter(r => !r.completed).length;
+            document.getElementById("openCount").textContent = openCount;
+
             repairs.forEach((r) => {
                 if (r.completed) {
                     const tr = document.createElement("tr");
