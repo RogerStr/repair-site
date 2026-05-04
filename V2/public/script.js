@@ -128,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const openCount = repairs.filter(r => !r.completed).length;
             const openCountEl = document.getElementById("openCount");
             openCountEl.textContent = openCount;
-            openCountEl.style.color = openCount >= 10 ? "red" : "";
+            openCountEl.style.color = openCount >= 14 ? "red" : openCount >= 10 ? "orange" : "";
 
             repairs.forEach((r) => {
                 if (r.completed) {
