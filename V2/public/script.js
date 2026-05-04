@@ -126,7 +126,9 @@ document.addEventListener("DOMContentLoaded", () => {
             doneTableBody.innerHTML = "";
 
             const openCount = repairs.filter(r => !r.completed).length;
-            document.getElementById("openCount").textContent = openCount;
+            const openCountEl = document.getElementById("openCount");
+            openCountEl.textContent = openCount;
+            openCountEl.style.color = openCount >= 10 ? "red" : "";
 
             repairs.forEach((r) => {
                 if (r.completed) {
